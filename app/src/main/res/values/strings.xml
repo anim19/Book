@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BookInventoryNiam</string>
+    <string name="title_activity_book_form">BookFormActivity</string>
+</resources>
