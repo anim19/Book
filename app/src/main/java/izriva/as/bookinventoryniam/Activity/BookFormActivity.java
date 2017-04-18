@@ -1,29 +1,29 @@
 package izriva.as.bookinventoryniam.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Toast;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import izriva.as.bookinventoryniam.Model.Book;
 import izriva.as.bookinventoryniam.R;
 
 public class BookFormActivity extends AppCompatActivity {
-
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.editBookTitle)
     EditText editBookTitle;
     @BindView(R.id.editBookAuthor)
     EditText editBookAuthor;
-    @BindView(R.id.spinnerGenre)
-    Spinner spinnerGenre;
+    @BindView(R.id.editGenre)
+    EditText editGenre;
     @BindView(R.id.editIsbn)
     EditText editISBN;
     @BindView(R.id.editPublishedYear)
@@ -32,33 +32,62 @@ public class BookFormActivity extends AppCompatActivity {
     EditText editSynopsis;
     @BindView(R.id.btnSave)
     Button btnSave;
+    Book book;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_form);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        //tombol untuk back
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
+        Bundle bundle = getIntent().getExtras();
+        //untuk view detail dari buku yang sudah ada
+        if (bundle != null) {
+            book = (Book) bundle.getSerializable("bookEdit");
+            editISBN.setText(book.getISBN());
+            editPublishYear.setText(book.getPublished_year() + "");
+            editBookAuthor.setText(book.getBook_author());
+            editBookTitle.setText(book.getBook_title());
+            editGenre.setText(book.getBook_genre());
+            editSynopsis.setText(book.getBook_synopsis());
+            btnSave.setEnabled(false);
+            getSupportActionBar().setTitle(book.getBook_title());
+        } else {
+            //buku baru
+            book = new Book();
+        }
 
+        btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 if (validate()) {
-                    Toast.makeText(BookFormActivity.this, "Data Valid!", Toast.LENGTH_SHORT).show();
+                    book.setISBN(editISBN.getText().toString());
+                    book.setBook_title(editBookTitle.getText().toString());
+                    book.setBook_author(editBookAuthor.getText().toString());
+                    book.setPublished_year(Integer.parseInt(editPublishYear.getText().toString()));
+                    book.setBook_genre(editGenre.getText().toString());
+                    book.setBook_synopsis(editSynopsis.getText().toString().equals("") ? "-" :
+                            editSynopsis.getText().toString());
+
+                    Intent i = new Intent();
+                    i.putExtra("book", book);
+                    setResult(RESULT_OK, i);
+                    finish();
                 }
             }
         });
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private boolean validate() {
